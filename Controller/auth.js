@@ -1,7 +1,7 @@
 let auth_data = require("../Model/auth_schema")
 let jwt = require("jsonwebtoken")
 let dotenv = require("dotenv")
-let bcrypt= require("bcrypt")
+let bcrypt= require("bcryptjs")
 dotenv.config()
 let SECRET_KEY = process.env.SECRET_KEY
 
