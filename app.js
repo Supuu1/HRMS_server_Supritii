@@ -7,10 +7,13 @@ require("./Database/db");
 
 let app = express();
 
+
 app.use(cors({
-  origin: "http://localhost:5174",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  origin: [
+    "http://localhost:5174",
+    "https://hrms-client-rbjz88rxa-paulsupriti71-2037s-projects.vercel.app"
+  ],
+  credentials: true
 }));
 
 app.use(express.json());
