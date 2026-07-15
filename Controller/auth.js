@@ -50,26 +50,36 @@ let Signup = async (req,res)=>{
         if(existing_user){
             return res.status(409).json({success:false, message:"user already exists"})
         }
-        let hash_password= await bcrypt.hash(password,10);
-        let hash_confirmPassword = await bcrypt.hash(confirmPassword, 10)
 
-        let data= await auth_data({
-        name:name,
-        email:email,
-        password:hash_password,
-        confirmPassword:hash_confirmPassword,
-        role:role
-    }).save()
-    
-    let token = jwt.sign({email:email},SECRET_KEY)
-    return res.status(201).json({success:true, message:"Registration successfull", token:token,role: existing_user.role, email: existing_user.email});
-    
-        
+        let hash_password = await bcrypt.hash(password,10);
+        let hash_confirmPassword = await bcrypt.hash(confirmPassword, 10);
+
+        let user = await new auth_data({
+            name:name,
+            email:email,
+            password:hash_password,
+            confirmPassword:hash_confirmPassword,
+            role:role
+        }).save();
+
+        let token = jwt.sign({email: user.email, id: user._id}, SECRET_KEY || "default-secret-key");
+        return res.status(201).json({
+            success:true,
+            message:"Registration successfull",
+            token:token,
+            role: user.role || role,
+            email: user.email,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role || role
+            }
+        });
     } catch(error){
-        return res.status(500).json({success:false, message:"Internal Server Error", });
-
+        console.error("Signup error:", error);
+        return res.status(500).json({success:false, message:"Internal Server Error"});
     }
-
 }
 let Login = async (req, res) => {
   let{email,password} = req.body;
@@ -84,7 +94,7 @@ let Login = async (req, res) => {
         return res.status(400).json({success:false,message:"Invalid credential"});
     }
 
-    let token = jwt.sign({email:existing_user.email}, SECRET_KEY);
+    let token = jwt.sign({email:existing_user.email}, SECRET_KEY || "default-secret-key");
 
     return res.status(200).json({success:true, message:"login successfull", token: token,role: existing_user.role, email: existing_user.email});
   } catch(error){
